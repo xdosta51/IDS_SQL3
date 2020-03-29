@@ -121,6 +121,7 @@ CREATE TABLE "operace" (
     "id" INT GENERATED AS IDENTITY NOT NULL PRIMARY KEY,
     "datum_provedeni" DATE DEFAULT CURRENT_TIMESTAMP,
     "typ" VARCHAR(80) NOT NULL,
+    "castka" VARCHAR(80),
     "stav" VARCHAR(80) default 'cekajici'
 		CHECK("stav" IN ('cekajici', 'dokoncena', 'zrusena', 'probihajici')),
     "zamestnanec_id" INT DEFAULT NULL,
@@ -188,7 +189,7 @@ VALUES ('kredit', 47794001, 1,13370);
 INSERT INTO "karta" ("typ_karty", "cislo_karty", "klient_id", "vlastnici_ucet")
 VALUES ('debit', 47794002, 2, 12346);
 
-INSERT INTO "operace" ("typ", "zamestnanec_id", "klient_id", "ucet_z", "ucet_na")
-VALUES ('platba', 2, 1, 12345, 13370);
-INSERT INTO "operace" ("stav", "typ", "zamestnanec_id", "klient_id", "ucet_z", "ucet_na")
-VALUES ('probihajici', 'platba', 1, 1, 12346, 12345);
+INSERT INTO "operace" ("typ", "zamestnanec_id", "klient_id", "ucet_z", "ucet_na", "castka")
+VALUES ('platba', 2, 1, 12345, 13370, '666');
+INSERT INTO "operace" ("stav", "typ", "zamestnanec_id", "klient_id", "ucet_z", "ucet_na", "castka")
+VALUES ('probihajici', 'platba', 1, 1, 12346, 12345, '253');
