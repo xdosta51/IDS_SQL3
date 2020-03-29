@@ -48,8 +48,7 @@ CREATE TABLE "pobocka" (
 	"psc" INT NOT NULL
         CHECK(REGEXP_LIKE(
 			"psc", '^[0-9]{5}$', 'i'
-		)),
-    "kod_pobocky" VARCHAR(10) NOT NULL
+		))
 );
 
 CREATE TABLE "klient" (
@@ -100,7 +99,9 @@ CREATE TABLE "disponence" (
     "ucet_cislo" INT NOT NULL,    
         CONSTRAINT "ucet_cislo_fk"
 		FOREIGN KEY ("ucet_cislo") REFERENCES "ucet" ("cislo")
-        ON DELETE CASCADE
+        ON DELETE CASCADE,
+    CONSTRAINT "disponence_pk"
+		PRIMARY KEY ("disponent_id", "ucet_cislo")
 );
 
 CREATE TABLE "karta" (
@@ -151,10 +152,10 @@ VALUES (9902305544, 'Jan', 'Pospech', 'xpospe@gmail.com', '773222111', 'Novy Jic
 INSERT INTO "osoba" ("rodne_cislo", "jmeno", "prijmeni", "email", "telefon", "mesto", "ulice", "cislo_popisne", "psc")
 VALUES (9305126233, 'Radek', 'Svec', 'svec1@gmail.com', '772333111', 'Kvasice', 'U Zamku', 552, 71233);
 
-INSERT INTO "pobocka" ("mesto", "ulice", "cislo_popisne", "psc", "kod_pobocky")
-VALUES ('Zlin', 'Svermova', 3251, 76302, 'Z1');
-INSERT INTO "pobocka" ("mesto", "ulice", "cislo_popisne", "psc", "kod_pobocky")
-VALUES ('Brno', 'Veveri', 1234, 62500, 'B1');
+INSERT INTO "pobocka" ("mesto", "ulice", "cislo_popisne", "psc")
+VALUES ('Zlin', 'Svermova', 3251, 76302);
+INSERT INTO "pobocka" ("mesto", "ulice", "cislo_popisne", "psc")
+VALUES ('Brno', 'Veveri', 1234, 62500);
 
 INSERT INTO "klient" ("datum_registrace", "osoba_id")
 VALUES (TO_DATE('1972-07-30', 'yyyy/mm/dd'), 9801226655);
