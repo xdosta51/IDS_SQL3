@@ -20,7 +20,7 @@ DROP TABLE "osoba";
 ------ VYTVORENI TABULEK ------
 
 CREATE TABLE "osoba" (
-	"rodne_cislo" BIGINT PRIMARY KEY,
+	"rodne_cislo" INT PRIMARY KEY,
 	"jmeno" VARCHAR(255) NOT NULL,
 	"prijmeni" VARCHAR(255) NOT NULL,
 	"email" VARCHAR(255) NOT NULL
@@ -57,7 +57,7 @@ CREATE TABLE "klient" (
 	"datum_registrace" DATE DEFAULT CURRENT_TIMESTAMP,
     "osoba_id" INT NOT NULL,
         CONSTRAINT "osoba_klient_id_fk"
-		FOREIGN KEY ("osoba_id") REFERENCES "osoba" ("id")
+		FOREIGN KEY ("osoba_id") REFERENCES "osoba" ("rodne_cislo")
 		ON DELETE CASCADE
 );
 
@@ -67,7 +67,7 @@ CREATE TABLE "zamestnanec" (
         CHECK("opravneni" IN ('cteni', 'vlastnictvi', 'prispivani', 'upravy')),
     "osoba_id" INT NOT NULL,
         CONSTRAINT "osoba_zamestnanec_id_fk"
-		FOREIGN KEY ("osoba_id") REFERENCES "osoba" ("id")
+		FOREIGN KEY ("osoba_id") REFERENCES "osoba" ("rodne_cislo")
 		ON DELETE CASCADE,
     "pobocka_id" INT DEFAULT NULL,
         CONSTRAINT "zamestnanec_pobocka_id_fk"
