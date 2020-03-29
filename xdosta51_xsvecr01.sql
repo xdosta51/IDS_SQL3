@@ -166,8 +166,6 @@ INSERT INTO "zamestnanec" ("opravneni", "osoba_id", "pobocka_id")
 VALUES ('upravy', 2, 2);
 INSERT INTO "zamestnanec" ("opravneni", "osoba_id", "pobocka_id")
 VALUES ('vlastnictvi', 3, 2);
-INSERT INTO "zamestnanec" ("opravneni", "osoba_id", "pobocka_id")
-VALUES ('vlastnictvi', 3, 1);
 
 INSERT INTO "ucet" ("cislo", "zustatek", "typ", "vlastnik_id", "zamestnanec_id")
 VALUES (12345, '566321', 'bezny',  2, 1);
