@@ -16,11 +16,17 @@ CREATE TABLE "osoba" (
 		CHECK(REGEXP_LIKE(
 			"email", '^[a-z]+[a-z0-9\.]*@[a-z0-9\.-]+\.[a-z]{2,}$', 'i'
 		)),
-	"telefon" VARCHAR(255) NOT NULL,
+	"telefon" VARCHAR(255) NOT NULL
+        CHECK(REGEXP_LIKE(
+			"telefon", '^[0-9]{9}$', 'i'
+		)),
 	"mesto" VARCHAR(255) NOT NULL,
 	"ulice" VARCHAR(255) NOT NULL,
 	"cislo_popisne" INT DEFAULT NULL,
 	"psc" INT DEFAULT NULL
+        CHECK(REGEXP_LIKE(
+			"psc", '^[0-9]{5}$', 'i'
+		))
 );
 
 CREATE TABLE "pobocka" (
@@ -30,7 +36,7 @@ CREATE TABLE "pobocka" (
 
 CREATE TABLE "klient" (
 	"id" INT GENERATED AS IDENTITY NOT NULL PRIMARY KEY,
-	"datum_registrace" DATE DEFAULT NULL,
+	"datum_registrace" DATE DEFAULT CURRENT_TIMESTAMP,
     "osoba_id" INT DEFAULT NULL,
         CONSTRAINT "osoba_klient_id_fk"
 		FOREIGN KEY ("osoba_id") REFERENCES "osoba" ("id")
@@ -153,7 +159,10 @@ INSERT INTO "ucet" ("cislo", "zustatek", "typ", "vlastnik_id", "zamestnanec_id")
 VALUES (12346, '566321', 'bezny',  2, 1);
 
 INSERT INTO "disponence" ("limit", "opravneni", "disponent_id", "ucet_cislo")
-VALUES ('5000', 'vyber', 1, 12345);
+VALUES ('5000', 'vyber', 1, 12346);
+
+INSERT INTO "disponence" ("limit", "opravneni", "disponent_id", "ucet_cislo")
+VALUES ('20000', 'vklad', 2, 13370);
 
 INSERT INTO "karta" ("typ_karty", "cislo_karty", "klient_id")
 VALUES ('gold', 47791333, 1);
@@ -161,5 +170,8 @@ VALUES ('gold', 47791333, 1);
 INSERT INTO "karta" ("typ_karty", "cislo_karty", "klient_id")
 VALUES ('silver', 47791334, 2);
 
-INSERT INTO "operace" ("typ", "zamestnanec_id", "klient_id", "ucet_z")
-VALUES ('platba_odchozi', 2, 1, 12345);
+INSERT INTO "operace" ("typ", "zamestnanec_id", "klient_id", "ucet_z", "ucet_na")
+VALUES ('platba', 2, 1, 12345, 13370);
+
+INSERT INTO "operace" ("stav", "typ", "zamestnanec_id", "klient_id", "ucet_z", "ucet_na")
+VALUES ('probihajici', 'platba', 1, 1, 12346, 12345);
