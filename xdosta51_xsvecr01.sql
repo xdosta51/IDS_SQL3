@@ -20,7 +20,7 @@ DROP TABLE "osoba";
 ------ VYTVORENI TABULEK ------
 
 CREATE TABLE "osoba" (
-	"id" INT GENERATED AS IDENTITY NOT NULL PRIMARY KEY,
+	"rodne_cislo" BIGINT PRIMARY KEY,
 	"jmeno" VARCHAR(255) NOT NULL,
 	"prijmeni" VARCHAR(255) NOT NULL,
 	"email" VARCHAR(255) NOT NULL
@@ -143,12 +143,12 @@ CREATE TABLE "operace" (
 
 -------- VLOZENI DAT DO TABULEK ---------
 
-INSERT INTO "osoba" ("jmeno", "prijmeni", "email", "telefon", "mesto", "ulice", "cislo_popisne", "psc")
-VALUES ('Jan', 'Novak', 'novak@gmail.com', '773821234', 'Brno', 'Hybesova', 211, 76432);
-INSERT INTO "osoba" ("jmeno", "prijmeni", "email", "telefon", "mesto", "ulice", "cislo_popisne", "psc")
-VALUES ('Jan', 'Pospech', 'xpospe@gmail.com', '773222111', 'Novy Jicin', 'Ostravska', 356, 75222);
-INSERT INTO "osoba" ("jmeno", "prijmeni", "email", "telefon", "mesto", "ulice", "cislo_popisne", "psc")
-VALUES ('Radek', 'Svec', 'svec1@gmail.com', '772333111', 'Kvasice', 'U Zamku', 552, 71233);
+INSERT INTO "osoba" ("rodne_cislo", "jmeno", "prijmeni", "email", "telefon", "mesto", "ulice", "cislo_popisne", "psc")
+VALUES (9801226655, 'Jan', 'Novak', 'novak@gmail.com', '773821234', 'Brno', 'Hybesova', 211, 76432);
+INSERT INTO "osoba" ("rodne_cislo", "jmeno", "prijmeni", "email", "telefon", "mesto", "ulice", "cislo_popisne", "psc")
+VALUES (9902305544, 'Jan', 'Pospech', 'xpospe@gmail.com', '773222111', 'Novy Jicin', 'Ostravska', 356, 75222);
+INSERT INTO "osoba" ("rodne_cislo", "jmeno", "prijmeni", "email", "telefon", "mesto", "ulice", "cislo_popisne", "psc")
+VALUES (9305126233, 'Radek', 'Svec', 'svec1@gmail.com', '772333111', 'Kvasice', 'U Zamku', 552, 71233);
 
 INSERT INTO "pobocka" ("mesto", "ulice", "cislo_popisne", "psc", "kod_pobocky")
 VALUES ('Zlin', 'Svermova', 3251, 76302, 'Z1');
@@ -156,16 +156,16 @@ INSERT INTO "pobocka" ("mesto", "ulice", "cislo_popisne", "psc", "kod_pobocky")
 VALUES ('Brno', 'Veveri', 1234, 62500, 'B1');
 
 INSERT INTO "klient" ("datum_registrace", "osoba_id")
-VALUES (TO_DATE('1972-07-30', 'yyyy/mm/dd'), 2);
+VALUES (TO_DATE('1972-07-30', 'yyyy/mm/dd'), 9801226655);
 INSERT INTO "klient" ("datum_registrace", "osoba_id")
-VALUES (TO_DATE('1972-07-31', 'yyyy/mm/dd'), 3);
+VALUES (TO_DATE('1972-07-31', 'yyyy/mm/dd'), 9902305544);
 
 INSERT INTO "zamestnanec" ("opravneni", "osoba_id", "pobocka_id")
-VALUES ('cteni', 1, 1);
+VALUES ('cteni', 9801226655, 1);
 INSERT INTO "zamestnanec" ("opravneni", "osoba_id", "pobocka_id")
-VALUES ('upravy', 2, 2);
+VALUES ('upravy', 9902305544, 2);
 INSERT INTO "zamestnanec" ("opravneni", "osoba_id", "pobocka_id")
-VALUES ('vlastnictvi', 3, 2);
+VALUES ('vlastnictvi', 9305126233, 2);
 
 INSERT INTO "ucet" ("cislo", "zustatek", "typ", "vlastnik_id", "zamestnanec_id")
 VALUES (12345, '566321', 'bezny',  2, 1);
