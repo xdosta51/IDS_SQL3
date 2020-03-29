@@ -1,3 +1,13 @@
+-- SQL skript pro vytvoření základních objektů schématu databáze.
+-- Zadání č. 26. - Banka
+
+--------------------------------------------------------------------------------
+
+-- Autor: Michal Dostal xdosta51@stud.fit.vutbr.cz
+-- Autor: Radek Svec xsvecr01@stud.fit.vutbr.cz
+
+------ SMAZANI TABULEK -------
+
 DROP TABLE "operace";
 DROP TABLE "karta";
 DROP TABLE "disponence";
@@ -7,6 +17,7 @@ DROP TABLE "pobocka";
 DROP TABLE "klient";
 DROP TABLE "osoba";
 
+------ VYTVORENI TABULEK ------
 
 CREATE TABLE "osoba" (
 	"id" INT GENERATED AS IDENTITY NOT NULL PRIMARY KEY,
@@ -22,8 +33,8 @@ CREATE TABLE "osoba" (
 		)),
 	"mesto" VARCHAR(255) NOT NULL,
 	"ulice" VARCHAR(255) NOT NULL,
-	"cislo_popisne" INT DEFAULT NULL,
-	"psc" INT DEFAULT NULL
+	"cislo_popisne" INT NOT NULL,
+	"psc" INT NOT NULL
         CHECK(REGEXP_LIKE(
 			"psc", '^[0-9]{5}$', 'i'
 		))
@@ -31,25 +42,33 @@ CREATE TABLE "osoba" (
 
 CREATE TABLE "pobocka" (
     "id" INT GENERATED AS IDENTITY NOT NULL PRIMARY KEY,
-    "Umisteni" VARCHAR(80) NOT NULL
+    "mesto" VARCHAR(80) NOT NULL,
+    "ulice" VARCHAR(255) NOT NULL,
+	"cislo_popisne" INT NOT NULL,
+	"psc" INT NOT NULL
+        CHECK(REGEXP_LIKE(
+			"psc", '^[0-9]{5}$', 'i'
+		)),
+    "kod_pobocky" VARCHAR(10) NOT NULL
 );
 
 CREATE TABLE "klient" (
 	"id" INT GENERATED AS IDENTITY NOT NULL PRIMARY KEY,
 	"datum_registrace" DATE DEFAULT CURRENT_TIMESTAMP,
-    "osoba_id" INT DEFAULT NULL,
+    "osoba_id" INT NOT NULL,
         CONSTRAINT "osoba_klient_id_fk"
 		FOREIGN KEY ("osoba_id") REFERENCES "osoba" ("id")
-		ON DELETE SET NULL
+		ON DELETE CASCADE
 );
 
 CREATE TABLE "zamestnanec" (
     "id" INT GENERATED AS IDENTITY NOT NULL PRIMARY KEY,
     "opravneni" VARCHAR(80) NOT NULL,
-    "osoba_id" INT DEFAULT NULL,
+        CHECK("opravneni" IN ('cteni', 'vlastnictvi', 'prispivani', 'upravy')),
+    "osoba_id" INT NOT NULL,
         CONSTRAINT "osoba_zamestnanec_id_fk"
 		FOREIGN KEY ("osoba_id") REFERENCES "osoba" ("id")
-		ON DELETE SET NULL,
+		ON DELETE CASCADE,
     "pobocka_id" INT DEFAULT NULL,
         CONSTRAINT "zamestnanec_pobocka_id_fk"
 	    FOREIGN KEY ("pobocka_id") REFERENCES "pobocka" ("id")
@@ -58,13 +77,13 @@ CREATE TABLE "zamestnanec" (
 
 CREATE TABLE "ucet" (
     "cislo" INT NOT NULL PRIMARY KEY,
-    "zustatek" VARCHAR(255) DEFAULT NULL,
+    "zustatek" VARCHAR(255) DEFAULT 0,
     "typ" VARCHAR(80) NOT NULL
         CHECK("typ" IN ('bezny', 'sporici', 'junior')),
-    "vlastnik_id" INT DEFAULT NULL,
+    "vlastnik_id" INT NOT NULL,
         CONSTRAINT "vlastnik_ucet_id_fk"
 		FOREIGN KEY ("vlastnik_id") REFERENCES "klient" ("id")
-        ON DELETE SET NULL,
+        ON DELETE CASCADE,
     "zamestnanec_id" INT DEFAULT NULL,
         CONSTRAINT "zamestnanec_zridil_id_fk"
 		FOREIGN KEY ("zamestnanec_id") REFERENCES "zamestnanec" ("id")
@@ -72,29 +91,30 @@ CREATE TABLE "ucet" (
 );
 
 CREATE TABLE "disponence" (
-    "limit" VARCHAR(255) DEFAULT NULL,
-    "opravneni" VARCHAR(80) DEFAULT NULL,
+    "limit" VARCHAR(255) DEFAULT 10000,
+    "opravneni" VARCHAR(80) DEFAULT 'zobrazit_zustatek',
 	"disponent_id" INT NOT NULL,
         CONSTRAINT "disponent_id_fk"
 		FOREIGN KEY ("disponent_id") REFERENCES "klient" ("id")
-        ON DELETE SET NULL,
+        ON DELETE CASCADE,
     "ucet_cislo" INT NOT NULL,    
         CONSTRAINT "ucet_cislo_fk"
 		FOREIGN KEY ("ucet_cislo") REFERENCES "ucet" ("cislo")
-        ON DELETE SET NULL
+        ON DELETE CASCADE
 );
 
 CREATE TABLE "karta" (
     "cislo_karty" INT NOT NULL PRIMARY KEY,
 	"typ_karty" VARCHAR(80) NOT NULL,
-    "klient_id" INT DEFAULT NULL,
+        CHECK("typ_karty" IN ('zlata', 'stribrna', 'debit', 'kredit')),
+    "klient_id" INT NOT NULL,
         CONSTRAINT "klient_karta_id_fk"
 		FOREIGN KEY ("klient_id") REFERENCES "klient" ("id")
-		ON DELETE SET NULL,
-    "vlastnici_ucet" INT DEFAULT NULL,
+		ON DELETE CASCADE,
+    "vlastnici_ucet" INT NOT NULL,
         CONSTRAINT "vlastnici_ucet_fk"
 		FOREIGN KEY ("vlastnici_ucet") REFERENCES "ucet" ("cislo")
-		ON DELETE SET NULL
+		ON DELETE CASCADE
 );
 
 CREATE TABLE "operace" (
@@ -107,10 +127,10 @@ CREATE TABLE "operace" (
         CONSTRAINT "zamestnanec_provedl_id_fk"
 		FOREIGN KEY ("zamestnanec_id") REFERENCES "zamestnanec" ("id")
         ON DELETE SET NULL,
-    "klient_id" INT DEFAULT NULL,
+    "klient_id" INT NOT NULL,
         CONSTRAINT "klient_operace_id_fk"
 		FOREIGN KEY ("klient_id") REFERENCES "klient" ("id")
-		ON DELETE SET NULL,
+		ON DELETE CASCADE,
     "ucet_z" INT DEFAULT NULL,
         CONSTRAINT "ucet_z_fk"
 		FOREIGN KEY ("ucet_z") REFERENCES "ucet" ("cislo")
@@ -121,57 +141,56 @@ CREATE TABLE "operace" (
 		ON DELETE SET NULL
 );
 
+-------- VLOZENI DAT DO TABULEK ---------
 
 INSERT INTO "osoba" ("jmeno", "prijmeni", "email", "telefon", "mesto", "ulice", "cislo_popisne", "psc")
-VALUES ('Jan', 'Nov�k', 'novak@gmail.com', '773821234', 'turbo', 'turbo', 211, 76432);
-
+VALUES ('Jan', 'Novak', 'novak@gmail.com', '773821234', 'Brno', 'Hybesova', 211, 76432);
 INSERT INTO "osoba" ("jmeno", "prijmeni", "email", "telefon", "mesto", "ulice", "cislo_popisne", "psc")
-VALUES ('Kosmodisk', 'Autor', 'auto@gmail.com', '773222111', 'kompresor', 'kompresor', 211, 76432);
-
+VALUES ('Jan', 'Pospech', 'xpospe@gmail.com', '773222111', 'Novy Jicin', 'Ostravska', 356, 75222);
 INSERT INTO "osoba" ("jmeno", "prijmeni", "email", "telefon", "mesto", "ulice", "cislo_popisne", "psc")
-VALUES ('Pracovnicek', 'Malinky', 'workhard@gmail.com', '774223765', 'V6', 'V8', 211, 76432);
+VALUES ('Radek', 'Svec', 'svec1@gmail.com', '772333111', 'Kvasice', 'U Zamku', 552, 71233);
 
-INSERT INTO "pobocka" ("Umisteni")
-VALUES ('Zlin');
-
-INSERT INTO "pobocka" ("Umisteni")
-VALUES ('Brno');
+INSERT INTO "pobocka" ("mesto", "ulice", "cislo_popisne", "psc", "kod_pobocky")
+VALUES ('Zlin', 'Svermova', 3251, 76302, 'Z1');
+INSERT INTO "pobocka" ("mesto", "ulice", "cislo_popisne", "psc", "kod_pobocky")
+VALUES ('Brno', 'Veveri', 1234, 62500, 'B1');
 
 INSERT INTO "klient" ("datum_registrace", "osoba_id")
 VALUES (TO_DATE('1972-07-30', 'yyyy/mm/dd'), 2);
-
 INSERT INTO "klient" ("datum_registrace", "osoba_id")
 VALUES (TO_DATE('1972-07-31', 'yyyy/mm/dd'), 3);
 
 INSERT INTO "zamestnanec" ("opravneni", "osoba_id", "pobocka_id")
-VALUES ('all', 1, 1);
-
+VALUES ('cteni', 1, 1);
 INSERT INTO "zamestnanec" ("opravneni", "osoba_id", "pobocka_id")
-VALUES ('small', 2, 2);
+VALUES ('upravy', 2, 2);
+INSERT INTO "zamestnanec" ("opravneni", "osoba_id", "pobocka_id")
+VALUES ('vlastnictvi', 3, 2);
+INSERT INTO "zamestnanec" ("opravneni", "osoba_id", "pobocka_id")
+VALUES ('vlastnictvi', 3, 1);
 
 INSERT INTO "ucet" ("cislo", "zustatek", "typ", "vlastnik_id", "zamestnanec_id")
 VALUES (12345, '566321', 'bezny',  2, 1);
-
 INSERT INTO "ucet" ("cislo", "zustatek", "typ", "vlastnik_id", "zamestnanec_id")
 VALUES (13370, '2500666', 'sporici',  1, 1);
-
 INSERT INTO "ucet" ("cislo", "zustatek", "typ", "vlastnik_id", "zamestnanec_id")
 VALUES (12346, '566321', 'bezny',  2, 1);
 
 INSERT INTO "disponence" ("limit", "opravneni", "disponent_id", "ucet_cislo")
 VALUES ('5000', 'vyber', 1, 12346);
-
 INSERT INTO "disponence" ("limit", "opravneni", "disponent_id", "ucet_cislo")
 VALUES ('20000', 'vklad', 2, 13370);
 
-INSERT INTO "karta" ("typ_karty", "cislo_karty", "klient_id")
-VALUES ('gold', 47791333, 1);
-
-INSERT INTO "karta" ("typ_karty", "cislo_karty", "klient_id")
-VALUES ('silver', 47791334, 2);
+INSERT INTO "karta" ("typ_karty", "cislo_karty", "klient_id", "vlastnici_ucet")
+VALUES ('zlata', 47791333, 1,12345);
+INSERT INTO "karta" ("typ_karty", "cislo_karty", "klient_id", "vlastnici_ucet")
+VALUES ('stribrna', 47791334, 2,12345);
+INSERT INTO "karta" ("typ_karty", "cislo_karty", "klient_id", "vlastnici_ucet")
+VALUES ('kredit', 47794001, 1,13370);
+INSERT INTO "karta" ("typ_karty", "cislo_karty", "klient_id", "vlastnici_ucet")
+VALUES ('debit', 47794002, 2, 12346);
 
 INSERT INTO "operace" ("typ", "zamestnanec_id", "klient_id", "ucet_z", "ucet_na")
 VALUES ('platba', 2, 1, 12345, 13370);
-
 INSERT INTO "operace" ("stav", "typ", "zamestnanec_id", "klient_id", "ucet_z", "ucet_na")
 VALUES ('probihajici', 'platba', 1, 1, 12346, 12345);
