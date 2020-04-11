@@ -70,7 +70,7 @@ CREATE TABLE zamestnanec (
 		ON DELETE CASCADE,
     pobocka_id INT DEFAULT NULL,
         CONSTRAINT zamestnanec_pobocka_id_fk
-	    FOREIGN KEY (pobocka_id) REFERENCES pobocka (id)
+	    FOREIGN KEY (pobocka_id) REFERENCES pobocka (pobocka_id)
 	    ON DELETE SET NULL    
 );
 
@@ -81,11 +81,11 @@ CREATE TABLE ucet (
         CHECK(typ IN ('bezny', 'sporici', 'junior')),
     klient_id INT NOT NULL,
         CONSTRAINT vlastnik_ucet_id_fk
-		FOREIGN KEY (klient_id) REFERENCES klient (id)
+		FOREIGN KEY (klient_id) REFERENCES klient (klient_id)
         ON DELETE CASCADE,
     zamestnanec_id INT DEFAULT NULL,
         CONSTRAINT zamestnanec_zridil_id_fk
-		FOREIGN KEY (zamestnanec_id) REFERENCES zamestnanec (id)
+		FOREIGN KEY (zamestnanec_id) REFERENCES zamestnanec (zamestnanec_id)
         ON DELETE SET NULL
 );
 
@@ -127,7 +127,7 @@ CREATE TABLE operace (
 		CHECK(stav IN ('cekajici', 'dokoncena', 'zrusena', 'probihajici')),
     zamestnanec_id INT DEFAULT NULL,
         CONSTRAINT zamestnanec_provedl_id_fk
-		FOREIGN KEY (zamestnanec_id) REFERENCES zamestnanec (id)
+		FOREIGN KEY (zamestnanec_id) REFERENCES zamestnanec (zamestnanec_id)
         ON DELETE SET NULL,
     klient_id INT NOT NULL,
         CONSTRAINT klient_operace_id_fk
@@ -248,7 +248,8 @@ VALUES ('cekajici', 'platba', (SELECT klient_id FROM klient WHERE osoba_id = (SE
 
 --vyhleda vsechny ucty zrizene zamestnancem Janem Novakem
 SELECT *
-FROM 
+FROM ucet natural join operace natural join karta
+where klient_id = 2;
 
 SELECT *
 FROM osoba
