@@ -75,7 +75,7 @@ CREATE TABLE zamestnanec (
 );
 
 CREATE TABLE ucet (
-    cislo INT NOT NULL PRIMARY KEY,
+    ucet_cislo INT NOT NULL PRIMARY KEY,
     zustatek VARCHAR(30) DEFAULT 0,
     typ VARCHAR(10) NOT NULL
         CHECK(typ IN ('bezny', 'sporici', 'junior')),
@@ -90,7 +90,7 @@ CREATE TABLE ucet (
 );
 
 CREATE TABLE disponence (
-    limit VARCHAR(30) DEFAULT 10000,
+    d_limit VARCHAR(30) DEFAULT 10000,
     opravneni VARCHAR(40) DEFAULT 'zobrazit_zustatek',
 	klient_id INT NOT NULL,
         CONSTRAINT klient_id_fk
@@ -98,7 +98,7 @@ CREATE TABLE disponence (
         ON DELETE CASCADE,
     ucet_cislo INT NOT NULL,    
         CONSTRAINT ucet_cislo_fk
-		FOREIGN KEY (ucet_cislo) REFERENCES ucet (cislo)
+		FOREIGN KEY (ucet_cislo) REFERENCES ucet (ucet_cislo)
         ON DELETE CASCADE,
     CONSTRAINT disponence_pk
 		PRIMARY KEY (klient_id, ucet_cislo)
@@ -114,7 +114,7 @@ CREATE TABLE karta (
 		ON DELETE CASCADE,
     vlastnici_ucet INT NOT NULL,
         CONSTRAINT vlastnici_ucet_fk
-		FOREIGN KEY (vlastnici_ucet) REFERENCES ucet (cislo)
+		FOREIGN KEY (vlastnici_ucet) REFERENCES ucet (ucet_cislo)
 		ON DELETE CASCADE
 );
 
@@ -135,11 +135,11 @@ CREATE TABLE operace (
 		ON DELETE CASCADE,
     ucet_z INT DEFAULT NULL,
         CONSTRAINT ucet_z_fk
-		FOREIGN KEY (ucet_z) REFERENCES ucet (cislo)
+		FOREIGN KEY (ucet_z) REFERENCES ucet (ucet_cislo)
 		ON DELETE SET NULL,
     ucet_na INT DEFAULT NULL,
         CONSTRAINT ucet_na_fk
-		FOREIGN KEY (ucet_na) REFERENCES ucet (cislo)
+		FOREIGN KEY (ucet_na) REFERENCES ucet (ucet_cislo)
 		ON DELETE SET NULL
 );
 
@@ -165,15 +165,15 @@ INSERT INTO pobocka (mesto, ulice, cislo_popisne, psc)
 VALUES ('Brno', 'Veveri', 1234, 62500);
 
 INSERT INTO klient (datum_registrace, osoba_id)
-VALUES (TO_DATE('1972-07-30', 'yyyy/mm/dd'), 9801226655);
+VALUES (TO_DATE('1972-11-30', 'yyyy/mm/dd'), 9801226655);
 INSERT INTO klient (datum_registrace, osoba_id)
-VALUES (TO_DATE('1972-07-31', 'yyyy/mm/dd'), 9902305544);
+VALUES (TO_DATE('1999-04-28', 'yyyy/mm/dd'), 9902305544);
 INSERT INTO klient (datum_registrace, osoba_id)
-VALUES (TO_DATE('1972-07-31', 'yyyy/mm/dd'), 9904186544);
+VALUES (TO_DATE('2005-07-16', 'yyyy/mm/dd'), 9904186544);
 INSERT INTO klient (datum_registrace, osoba_id)
-VALUES (TO_DATE('1972-07-31', 'yyyy/mm/dd'), 8787876555);
+VALUES (TO_DATE('2013-04-13', 'yyyy/mm/dd'), 8787876555);
 INSERT INTO klient (datum_registrace, osoba_id)
-VALUES (TO_DATE('1972-07-31', 'yyyy/mm/dd'), 9235419865);
+VALUES (TO_DATE('2020-01-08', 'yyyy/mm/dd'), 9235419865);
 
 
 INSERT INTO zamestnanec (opravneni, osoba_id, pobocka_id)
@@ -183,27 +183,31 @@ VALUES ('upravy', 9902305544, 2);
 INSERT INTO zamestnanec (opravneni, osoba_id, pobocka_id)
 VALUES ('vlastnictvi', 9305126233, 2);
 
-INSERT INTO ucet (cislo, zustatek, typ, klient_id, zamestnanec_id)
+INSERT INTO ucet (ucet_cislo, zustatek, typ, klient_id, zamestnanec_id)
 VALUES (12345, '566321', 'bezny',  2, 1);
-INSERT INTO ucet (cislo, zustatek, typ, klient_id, zamestnanec_id)
+INSERT INTO ucet (ucet_cislo, zustatek, typ, klient_id, zamestnanec_id)
 VALUES (13370, '2500666', 'sporici',  1, 1);
-INSERT INTO ucet (cislo, zustatek, typ, klient_id, zamestnanec_id)
+INSERT INTO ucet (ucet_cislo, zustatek, typ, klient_id, zamestnanec_id)
 VALUES (12346, '566321', 'bezny',  2, 1);
-INSERT INTO ucet (cislo, zustatek, typ, klient_id, zamestnanec_id)
+INSERT INTO ucet (ucet_cislo, zustatek, typ, klient_id, zamestnanec_id)
 VALUES (11111, '123654', 'bezny',  3, 3);
-INSERT INTO ucet (cislo, zustatek, typ, klient_id, zamestnanec_id)
+INSERT INTO ucet (ucet_cislo, zustatek, typ, klient_id, zamestnanec_id)
 VALUES (22222, '99666', 'bezny',  4, 3);
 
 
 
-INSERT INTO disponence (limit, opravneni, klient_id, ucet_cislo)
+INSERT INTO disponence (d_limit, opravneni, klient_id, ucet_cislo)
 VALUES ('5000', 'vyber', 1, 12346);
-INSERT INTO disponence (limit, opravneni, klient_id, ucet_cislo)
+INSERT INTO disponence (d_limit, opravneni, klient_id, ucet_cislo)
 VALUES ('20000', 'vklad', 2, 13370);
-INSERT INTO disponence (limit, opravneni, klient_id, ucet_cislo)
+INSERT INTO disponence (d_limit, opravneni, klient_id, ucet_cislo)
 VALUES ('10000', 'vyber', 5, 11111);
-INSERT INTO disponence (limit, opravneni, klient_id, ucet_cislo)
+INSERT INTO disponence (d_limit, opravneni, klient_id, ucet_cislo)
 VALUES ('4500', 'vyber', 5, 22222);
+INSERT INTO disponence (d_limit, opravneni, klient_id, ucet_cislo)
+VALUES ('400', 'vyber', 3, 22222);
+INSERT INTO disponence (d_limit, opravneni, klient_id, ucet_cislo)
+VALUES ('2500', 'vklad', 1, 22222);
 
 INSERT INTO karta (typ_karty, cislo_karty, klient_id, vlastnici_ucet)
 VALUES ('zlata', 47791333, 1,12345);
@@ -233,26 +237,46 @@ VALUES ('probihajici', 'platba', 2, 1, 11111, 22222, '444');
 INSERT INTO operace (stav, typ, zamestnanec_id, klient_id, ucet_z, ucet_na, castka)
 VALUES ('zrusena', 'platba', 3, 1, 22222, 12345, '1563');
 
-
 --pridani noveho zamestnance
 INSERT INTO zamestnanec (opravneni, osoba_id, pobocka_id)
 VALUES ('upravy', (SELECT rodne_cislo FROM osoba WHERE jmeno = 'Pamela' AND prijmeni = 'Andersonova'), (SELECT pobocka_id FROM pobocka WHERE mesto = 'Brno' AND cislo_popisne = '1234'));
 
---pridani noveho disponenta 
-INSERT INTO disponence (limit, opravneni, klient_id, ucet_cislo)
-VALUES ('2500', 'vyber', (SELECT klient_id FROM klient WHERE osoba_id = '9235419865'), 12345);
 --operace
 INSERT INTO operace (stav, typ, klient_id, zamestnanec_id, ucet_z, ucet_na, castka)
-VALUES ('cekajici', 'platba', (SELECT klient_id FROM klient WHERE osoba_id = (SELECT rodne_cislo FROM osoba WHERE jmeno = 'Myspulin' AND prijmeni = 'Kot')), (SELECT zamestnanec_id FROM zamestnanec WHERE osoba_id = (SELECT rodne_cislo FROM osoba WHERE jmeno = 'Myspulin' AND prijmeni = 'Kot')), 22222, 12345, '1563');
+VALUES ('cekajici', 'platba', (SELECT klient_id FROM klient WHERE osoba_id = (SELECT rodne_cislo FROM osoba WHERE jmeno = 'Myspulin' AND prijmeni = 'Kot')), (SELECT zamestnanec_id FROM zamestnanec WHERE osoba_id = (SELECT rodne_cislo FROM osoba WHERE jmeno = 'Pamela' AND prijmeni = 'Andersonova')), 22222, 12345, '1563');
+
+------------------------------
+--SELECT SPOJENIM DVOU TABULEK
+------------------------------
+
+--vypis klientu a jejich zakladni informace
+SELECT klient_id, datum_registrace, osoba.rodne_cislo, jmeno, prijmeni, email, telefon, mesto
+FROM klient
+JOIN osoba ON osoba.rodne_cislo = klient.osoba_id;
+
+--vypis zamestnancu pracujicich na pobocce v brne a jejich zakladni informace
+SELECT zamestnanec_id, opravneni, jmeno, prijmeni, email, telefon
+FROM zamestnanec
+JOIN osoba ON osoba.rodne_cislo = zamestnanec.osoba_id
+WHERE pobocka_id = (SELECT pobocka_id FROM pobocka WHERE mesto = 'Brno' AND cislo_popisne = '1234');
+
+--vypis zlatych nebo stribrnych karet a jejich uctu
+SELECT vlastnici_ucet, ucet.zustatek, ucet.typ, cislo_karty, typ_karty
+FROM ucet
+JOIN karta ON ucet.ucet_cislo = vlastnici_ucet
+WHERE typ_karty = 'stribrna' OR typ_karty = 'zlata';
 
 
---vyhleda vsechny ucty zrizene zamestnancem Janem Novakem
-SELECT *
-FROM ucet natural join operace natural join karta
-where klient_id = 2;
+------------------------------
+--SELECT SPOJENIM VICE TABULEK
+------------------------------
 
-SELECT *
-FROM osoba
-WHERE rodne_cislo in (SELECT osoba_id FROM klient WHERE klient_id = (SELECT klient_id FROM ucet WHERE zamestnanec_id = (SELECT zamestnanec_id FROM zamestnanec WHERE osoba_id = (SELECT rodne_cislo FROM osoba WHERE jmeno = 'Jan' AND prijmeni = 'Novak'))));
+--vypis disponentu u uctu s cislem 22222
+SELECT ucet.ucet_cislo, zustatek, ucet.typ, disponence.klient_id AS dis_id, jmeno AS dis_jmeno, prijmeni AS dis_prijmeni, opravneni, d_limit AS dis_limit
+FROM ucet 
+JOIN disponence ON ucet.ucet_cislo = disponence.ucet_cislo
+JOIN klient ON klient.klient_id = disponence.klient_id
+JOIN osoba ON osoba.rodne_cislo = klient.osoba_id
+WHERE ucet.ucet_cislo = '22222';
 
 
