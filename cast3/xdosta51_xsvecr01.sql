@@ -225,6 +225,8 @@ INSERT INTO karta (typ_karty, cislo_karty, klient_id, vlastnici_ucet)
 VALUES ('debit', 22200222, 4, 22222);
 INSERT INTO karta (typ_karty, cislo_karty, klient_id, vlastnici_ucet)
 VALUES ('debit', 22200223, 5, 22222);
+INSERT INTO karta (typ_karty, cislo_karty, klient_id, vlastnici_ucet)
+VALUES ('stribrna', 22200224, 5, 22222);
 
 INSERT INTO operace (typ, zamestnanec_id, klient_id, ucet_z, ucet_na, castka)
 VALUES ('platba', 2, 1, 12345, 13370, '666');
@@ -236,6 +238,14 @@ INSERT INTO operace (stav, typ, zamestnanec_id, klient_id, ucet_z, ucet_na, cast
 VALUES ('probihajici', 'platba', 2, 1, 11111, 22222, '444');
 INSERT INTO operace (stav, typ, zamestnanec_id, klient_id, ucet_z, ucet_na, castka)
 VALUES ('zrusena', 'platba', 3, 1, 22222, 12345, '1563');
+INSERT INTO operace (stav, typ, zamestnanec_id, klient_id, ucet_z, ucet_na, castka)
+VALUES ('dokoncena', 'platba', 3, 1, 22222, 11111, '5541');
+INSERT INTO operace (stav, typ, zamestnanec_id, klient_id, ucet_z, ucet_na, castka)
+VALUES ('probihajici', 'platba', 3, 1, 22222, 12346, '123');
+INSERT INTO operace (stav, typ, zamestnanec_id, klient_id, ucet_z, ucet_na, castka)
+VALUES ('cekajici', 'platba', 2, 1, 12345, 22222, '6498');
+INSERT INTO operace (stav, typ, zamestnanec_id, klient_id, ucet_z, ucet_na, castka)
+VALUES ('dokoncena', 'platba', 2, 1, 12345, 13370, '2511');
 
 --pridani noveho zamestnance
 INSERT INTO zamestnanec (opravneni, osoba_id, pobocka_id)
@@ -279,4 +289,21 @@ JOIN klient ON klient.klient_id = disponence.klient_id
 JOIN osoba ON osoba.rodne_cislo = klient.osoba_id
 WHERE ucet.ucet_cislo = '22222';
 
+------------------------------
+--GROUP BY S AGREGACNI FUNKCI
+------------------------------
 
+--vypis uctu s vice nez jednou kartou a jejich pocet
+SELECT ucet.klient_id AS vlastnik_uctu_id, ucet_cislo, ucet.typ, COUNT(vlastnici_ucet) pocet_karet
+FROM karta
+JOIN ucet ON ucet.ucet_cislo = karta.vlastnici_ucet
+GROUP BY karta.vlastnici_ucet, ucet_cislo, ucet.typ, ucet.klient_id
+HAVING COUNT(vlastnici_ucet) > 1
+ORDER BY ucet.klient_id;
+
+
+--vypis maximalni a minimalni platby ze vsech uctu
+SELECT ucet.klient_id, operace.ucet_z, MIN(CAST(castka AS INT)) AS minimal, MAX(CAST(castka AS INT)) AS maximal
+FROM ucet
+JOIN operace ON ucet.ucet_cislo = operace.ucet_z
+GROUP BY operace.ucet_z, ucet.klient_id;
