@@ -156,7 +156,7 @@ VALUES (9904186544, 'Petr', 'Fiser', 'petros@gmail.com', '766543211', 'Zlin', 'J
 INSERT INTO osoba (rodne_cislo, jmeno, prijmeni, email, telefon, mesto, ulice, cislo_popisne, psc)
 VALUES (8787876555, 'Myspulin', 'Kot', 'kotmysp@gmail.com', '666555444', 'Kocourkov', 'Ocaskova', 13, 10022);
 INSERT INTO osoba (rodne_cislo, jmeno, prijmeni, email, telefon, mesto, ulice, cislo_popisne, psc)
-VALUES (9235419865, 'Pamela', 'Andersonova', 'AnderPam@gmail.com', '777888999', 'Kurim', 'Luxusni', 25, 65487);
+VALUES (9235419865, 'Pamela', 'Andersonova', 'AnderPam@gmail.com', '777888999', 'Brno', 'Luxusni', 25, 65487);
 
 
 INSERT INTO pobocka (mesto, ulice, cislo_popisne, psc)
@@ -193,6 +193,8 @@ INSERT INTO ucet (ucet_cislo, zustatek, typ, klient_id, zamestnanec_id)
 VALUES (11111, '123654', 'bezny',  3, 3);
 INSERT INTO ucet (ucet_cislo, zustatek, typ, klient_id, zamestnanec_id)
 VALUES (22222, '99666', 'bezny',  4, 3);
+INSERT INTO ucet (ucet_cislo, zustatek, typ, klient_id, zamestnanec_id)
+VALUES (33333, '99777', 'sporici',  4, 2);
 
 
 
@@ -235,17 +237,19 @@ VALUES ('probihajici', 'platba', 1, 1, 12346, 12345, '253');
 INSERT INTO operace (stav, typ, zamestnanec_id, klient_id, ucet_z, ucet_na, castka)
 VALUES ('dokoncena', 'platba', 3, 1, 12346, 12345, '333');
 INSERT INTO operace (stav, typ, zamestnanec_id, klient_id, ucet_z, ucet_na, castka)
-VALUES ('probihajici', 'platba', 2, 1, 11111, 22222, '444');
+VALUES ('probihajici', 'platba', 2, 2, 11111, 22222, '444');
 INSERT INTO operace (stav, typ, zamestnanec_id, klient_id, ucet_z, ucet_na, castka)
-VALUES ('zrusena', 'platba', 3, 1, 22222, 12345, '1563');
+VALUES ('zrusena', 'platba', 3, 4, 22222, 12345, '1563');
 INSERT INTO operace (stav, typ, zamestnanec_id, klient_id, ucet_z, ucet_na, castka)
-VALUES ('dokoncena', 'platba', 3, 1, 22222, 11111, '5541');
+VALUES ('dokoncena', 'platba', 3, 4, 22222, 11111, '5541');
 INSERT INTO operace (stav, typ, zamestnanec_id, klient_id, ucet_z, ucet_na, castka)
-VALUES ('probihajici', 'platba', 3, 1, 22222, 12346, '123');
+VALUES ('probihajici', 'platba', 3, 4, 22222, 12346, '123');
 INSERT INTO operace (stav, typ, zamestnanec_id, klient_id, ucet_z, ucet_na, castka)
 VALUES ('cekajici', 'platba', 2, 1, 12345, 22222, '6498');
 INSERT INTO operace (stav, typ, zamestnanec_id, klient_id, ucet_z, ucet_na, castka)
 VALUES ('dokoncena', 'platba', 2, 1, 12345, 13370, '2511');
+INSERT INTO operace (stav, typ, zamestnanec_id, klient_id, ucet_z, ucet_na, castka)
+VALUES ('dokoncena', 'platba', 1, 4, 33333, 22222, '1000');
 
 --pridani noveho zamestnance
 INSERT INTO zamestnanec (opravneni, osoba_id, pobocka_id)
@@ -278,16 +282,15 @@ WHERE typ_karty = 'stribrna' OR typ_karty = 'zlata';
 
 
 ------------------------------
---SELECT SPOJENIM VICE TABULEK
+--SELECT SPOJENIM TRI TABULEK
 ------------------------------
 
 --vypis disponentu u uctu s cislem 22222
-SELECT ucet.ucet_cislo, zustatek, ucet.typ, disponence.klient_id AS dis_id, jmeno AS dis_jmeno, prijmeni AS dis_prijmeni, opravneni, d_limit AS dis_limit
-FROM ucet 
-JOIN disponence ON ucet.ucet_cislo = disponence.ucet_cislo
+SELECT disponence.klient_id AS dis_id, jmeno AS dis_jmeno, prijmeni AS dis_prijmeni, opravneni, d_limit AS dis_limit
+FROM disponence 
 JOIN klient ON klient.klient_id = disponence.klient_id
 JOIN osoba ON osoba.rodne_cislo = klient.osoba_id
-WHERE ucet.ucet_cislo = '22222';
+WHERE disponence.ucet_cislo = '22222';
 
 ------------------------------
 --GROUP BY S AGREGACNI FUNKCI
@@ -302,8 +305,27 @@ HAVING COUNT(vlastnici_ucet) > 1
 ORDER BY ucet.klient_id;
 
 
---vypis maximalni a minimalni platby ze vsech uctu
-SELECT ucet.klient_id, operace.ucet_z, MIN(CAST(castka AS INT)) AS minimal, MAX(CAST(castka AS INT)) AS maximal
+--vypis maximalni a minimalni nezrusene platby ze vsech uctu
+SELECT ucet.klient_id, operace.ucet_z, MIN(CAST(castka AS INT)) AS nenizsi_platba, MAX(CAST(castka AS INT)) AS nejvyssi_platba
 FROM ucet
 JOIN operace ON ucet.ucet_cislo = operace.ucet_z
+WHERE NOT operace.stav = 'zrusena'
 GROUP BY operace.ucet_z, ucet.klient_id;
+
+-----------
+--EXSITS
+-----------
+--vypise ucty, ktere maji nejake disponenty
+
+SELECT ucet.ucet_cislo as ucty_s_disponenty
+FROM ucet
+WHERE EXISTS (SELECT disponence.ucet_cislo FROM disponence WHERE disponence.ucet_cislo = ucet.ucet_cislo);
+
+
+-------------------------
+--IN SE VNORENYM SELECTEM
+-------------------------
+--vypise vsechny registrovane osoby, ktere sdili stejne mesto s pobockou
+SELECT * 
+FROM osoba
+WHERE osoba.mesto IN (SELECT mesto FROM pobocka);
